@@ -2,10 +2,16 @@ import PropTypes from 'prop-types';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 const ResultModal = forwardRef(function ResultModal(
-  { result, targetTime },
+  { targetTime, remainingTime, handleReset },
   ref
 ) {
   const dialog = useRef();
+
+  const userLost = remainingTime <= 0;
+
+  const formattedRemainingTime = (remainingTime / 1000).toFixed(2);
+
+  const score = Math.round((1 - remainingTime / (targetTime * 1000)) * 100);
 
   useImperativeHandle(ref, () => ({
     open() {
@@ -15,15 +21,15 @@ const ResultModal = forwardRef(function ResultModal(
 
   return (
     <dialog className="result-modal" ref={dialog}>
-      <h2>You {result} </h2>
+      <h2>{userLost ? 'You lost' : `Your score: ${score}`}</h2>
       <p>
         The target time was <strong>{targetTime} s.</strong>
       </p>
       <p>
         You stopped the timer with
-        <strong>X seconds left</strong>
+        <strong> {formattedRemainingTime}s left.</strong>
       </p>
-      <form method="dialog">
+      <form method="dialog" onSubmit={handleReset}>
         <button>Close</button>
       </form>
     </dialog>
@@ -31,8 +37,9 @@ const ResultModal = forwardRef(function ResultModal(
 });
 
 ResultModal.propTypes = {
-  result: PropTypes.string.isRequired,
   targetTime: PropTypes.number.isRequired,
+  remainingTime: PropTypes.number.isRequired,
+  handleReset: PropTypes.func.isRequired,
 };
 
 export { ResultModal };
